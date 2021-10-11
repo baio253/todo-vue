@@ -8,32 +8,42 @@
       @keyup.enter="addTodo"
     />
     <div v-if="todosFiltered !== 'No Todos'" class="todos">
-      <div v-for="(todo, i) in todosFiltered" :key="todo.id" class="todo-item">
-        <div class="todo-item-left">
-          <input type="checkbox" v-model="todo.completed" />
-          <div
-            v-if="!todo.editing"
-            @dblclick="editTodo(todo)"
-            class="todo-item-label"
-            :class="{ completed: todo.completed }"
-          >
-            {{ todo.title }}
+      <transition-group
+        name="custom-classes-transition"
+        enter-active-class="animate__animated animate__fadeInUp"
+        leave-active-class="animate__animated animate__fadeOutDown"
+      >
+        <div
+          v-for="(todo, i) in todosFiltered"
+          :key="todo.id"
+          class="todo-item"
+        >
+          <div class="todo-item-left">
+            <input type="checkbox" v-model="todo.completed" />
+            <div
+              v-if="!todo.editing"
+              @dblclick="editTodo(todo)"
+              class="todo-item-label"
+              :class="{ completed: todo.completed }"
+            >
+              {{ todo.title }}
+            </div>
+            <input
+              v-else
+              class="todo-item-edit"
+              type="text"
+              v-model="todo.title"
+              @blur="doneEdit(todo)"
+              @keyup.enter="doneEdit(todo)"
+              @keyup.esc="cancelEdit(todo)"
+              v-focus
+            />
           </div>
-          <input
-            v-else
-            class="todo-item-edit"
-            type="text"
-            v-model="todo.title"
-            @blur="doneEdit(todo)"
-            @keyup.enter="doneEdit(todo)"
-            @keyup.esc="cancelEdit(todo)"
-            v-focus
-          />
+          <div @click="removeTodo(i)" class="remove-items">
+            &times;
+          </div>
         </div>
-        <div @click="removeTodo(i)" class="remove-items">
-          &times;
-        </div>
-      </div>
+      </transition-group>
     </div>
     <div v-else class="todos">
       No Todos Yet
@@ -69,15 +79,19 @@
         </button>
       </div>
       <div class="clear-completed">
-        <button v-if="showClearBtn" @click="clearCompleted">
-          Clear Completed
-        </button>
+        <transition name="fade">
+          <button v-if="showClearBtn" @click="clearCompleted">
+            Clear Completed
+          </button>
+        </transition>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import "animate.css";
+
 export default {
   name: "TodoList",
   data() {
@@ -196,6 +210,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  animation-duration: 0.3s;
   .remove-items {
     cursor: pointer;
     margin-left: 14px;
@@ -264,5 +279,14 @@ export default {
       }
     }
   }
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
